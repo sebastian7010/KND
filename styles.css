@@ -1,0 +1,79 @@
+body {
+    font-family: 'Courier New', monospace;
+    background: black;
+    color: #0F0;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+input[type="text"] {
+    font-size: 18px;
+    padding: 8px;
+    width: 80%;
+    max-width: 400px;
+}
+
+h2 {
+    margin-bottom: 10px;
+}
+
+#typedDisplay {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+#verticalDisplay {
+    display: none;
+    /* Se mostrará cuando inicie la animación vertical */
+    flex-direction: column;
+    align-items: center;
+}
+
+.letter {
+    font-size: 32px;
+    margin: 10px;
+}
+
+.letter-char {
+    /* Puedes personalizar el estilo de cada letra aquí si lo deseas */
+}
+
+.tooltip {
+    font-size: 16px;
+    margin-left: 10px;
+    color: #FFF;
+}
+
+
+/* El canvas ocupará toda la pantalla para el efecto Matrix */
+
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+
+/* Media queries para dispositivos móviles */
+
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    input[type="text"] {
+        width: 95%;
+        font-size: 16px;
+    }
+    h2 {
+        font-size: 20px;
+    }
+    #typedDisplay,
+    .letter {
+        font-size: 24px;
+    }
+    .tooltip {
+        font-size: 14px;
+        margin-left: 5px;
+    }
+}

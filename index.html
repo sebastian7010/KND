@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Etiqueta meta para viewport responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programa KND Estilo Misión</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Paso 1: Ingreso de la Misión -->
+    <div id="missionStep">
+        <h2>Ingrese la Misión</h2>
+        <input type="text" id="missionInput" placeholder="Escribe tu misión y presiona Enter" autofocus>
+    </div>
+
+    <!-- Paso 2: Ingreso de significado para cada letra -->
+    <div id="letterStep" style="display: none;">
+        <h2>Ingrese el significado para cada letra</h2>
+        <form id="letterForm"></form>
+        <p>Presiona Enter en cada campo para confirmar.</p>
+    </div>
+
+    <!-- Paso 3: Efecto de Tipeo horizontal y animación vertical -->
+    <div id="displayStep" style="display: none;">
+        <!-- Contenedor para efecto horizontal -->
+        <div id="typedDisplay"></div>
+        <!-- Contenedor vertical: se escribirá letra por letra con su significado -->
+        <div id="verticalDisplay" style="display: none;"></div>
+        <p id="instruction" style="display: none;">Presiona Enter dos veces para activar el efecto Matrix.</p>
+    </div>
+
+    <!-- Paso 4: Canvas para el efecto Matrix -->
+    <canvas id="matrixCanvas" style="display: none;"></canvas>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
