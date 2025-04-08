@@ -25,10 +25,13 @@ h2 {
 
 #verticalDisplay {
     display: none;
-    /* Se mostrará cuando inicie la animación vertical */
+    /* Se mostrará en la animación vertical */
     flex-direction: column;
     align-items: center;
 }
+
+
+/* Cada letra y su tooltip */
 
 .letter {
     font-size: 32px;
@@ -36,13 +39,30 @@ h2 {
 }
 
 .letter-char {
-    /* Aquí puedes definir estilos específicos para cada letra */
+    /* Las letras se escribirán dentro de este span */
 }
 
 .tooltip {
     font-size: 16px;
     margin-left: 10px;
     color: #FFF;
+}
+
+
+/* Estilo del botón "Ejecutar" con look hacker */
+
+#controlButton {
+    font-size: 20px;
+    padding: 10px 20px;
+    background-color: black;
+    color: #0F0;
+    border: 2px solid #0F0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#controlButton:hover {
+    box-shadow: 0 0 10px #0F0;
 }
 
 
@@ -75,5 +95,9 @@ canvas {
     .tooltip {
         font-size: 14px;
         margin-left: 5px;
+    }
+    #controlButton {
+        font-size: 18px;
+        padding: 8px 16px;
     }
 }

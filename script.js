@@ -3,11 +3,13 @@ document.addEventListener("DOMContentLoaded", function() {
     let missionText = "";
     let letterMeanings = [];
     let typedIndex = 0;
-
-    // Archivo de audio para el sonido de tipeo (coloca typing.mp3 en la misma carpeta)
+    // Archivo de audio para el sonido de tipeo (colócalo en la misma carpeta, e.g., "typing.mp3")
     const typingSound = new Audio('typing.mp3');
 
-    // Referencias a los elementos del DOM
+    // Variables de fase: 1 = horizontal terminado, esperando para iniciar vertical; 2 = vertical terminado, esperando Matrix.
+    let currentPhase = 0;
+
+    // Referencias a elementos del DOM
     const missionStep = document.getElementById("missionStep");
     const letterStep = document.getElementById("letterStep");
     const displayStep = document.getElementById("displayStep");
@@ -15,12 +17,13 @@ document.addEventListener("DOMContentLoaded", function() {
     const letterForm = document.getElementById("letterForm");
     const typedDisplay = document.getElementById("typedDisplay");
     const verticalDisplay = document.getElementById("verticalDisplay");
-    const instruction = document.getElementById("instruction");
+    const controlButton = document.getElementById("controlButton");
     const matrixCanvas = document.getElementById("matrixCanvas");
 
-    let tapCount = 0; // Para medir toques en pantalla para activar Matrix
+    // Contador para la animación vertical
+    let verticalIndex = 0;
 
-    // PASO 1: Ingreso de la Misión (en esta parte se puede seguir usando Enter para ingresar texto)
+    // Evento para ingresar la misión
     missionInput.addEventListener("keydown", function(e) {
         if (e.key === "Enter") {
             missionText = missionInput.value.trim();
@@ -33,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Generar inputs para cada letra de la misión
+    // Generar formulario de significados (cada letra de la misión)
     function generateLetterInputs() {
         letterForm.innerHTML = "";
         for (let i = 0; i < missionText.length; i++) {
@@ -49,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function() {
             input.dataset.letterIndex = i;
             input.placeholder = "Significado de " + missionText[i];
 
-            // Al presionar Enter (o tocando el botón del teclado), confirmar y pasar al siguiente campo
+            // Permitir confirmar con Enter en cada campo
             input.addEventListener("keydown", function(e) {
                 if (e.key === "Enter") {
                     e.preventDefault();
@@ -68,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Recopilar los significados ingresados
+    // Recopila los significados ingresados
     function collectLetterMeanings() {
         const inputs = letterForm.querySelectorAll("input");
         letterMeanings = [];
@@ -77,11 +80,11 @@ document.addEventListener("DOMContentLoaded", function() {
         });
         letterStep.style.display = "none";
         displayStep.style.display = "block";
-        // Inicia el efecto de tipeo horizontal
+        // Inicia el efecto horizontal de tipeo
         startTypedEffect();
     }
 
-    // PASO 3: Efecto de Tipeo horizontal
+    // Efecto de tipeo horizontal (escribe todo el mensaje en typedDisplay)
     function startTypedEffect() {
         typedDisplay.textContent = "";
         typedIndex = 0;
@@ -91,48 +94,54 @@ document.addEventListener("DOMContentLoaded", function() {
     function typeLetter() {
         if (typedIndex < missionText.length) {
             typedDisplay.textContent += missionText[typedIndex];
-            // Reproduce el sonido por cada letra escrita
+            // Reproduce el sonido por cada letra
             typingSound.currentTime = 0;
             typingSound.play();
             typedIndex++;
             setTimeout(typeLetter, 300);
         } else {
-            // Una vez terminado el efecto horizontal, se agrega un listener para detectar toque (click)
-            // En móviles, basta con tocar la pantalla
-            document.addEventListener("click", waitForVertical, { once: true });
+            // Finalizado el efecto horizontal, actualizamos la fase
+            currentPhase = 1;
+            // Mostramos el botón de control
+            controlButton.style.display = "inline-block";
+            controlButton.textContent = "Ejecutar";
         }
     }
 
-    // PASO 3.1: Iniciar animación vertical al tocar en pantalla
-    function waitForVertical(e) {
-        // Oculta el contenedor horizontal y muestra el vertical
-        typedDisplay.style.display = "none";
-        verticalDisplay.style.display = "flex";
-        verticalDisplay.innerHTML = "";
-        verticalIndex = 0;
-        verticalType();
-    }
+    // Botón de control para avanzar entre fases
+    controlButton.addEventListener("click", function() {
+        if (currentPhase === 1) {
+            // Fase 1: Iniciar animación vertical
+            controlButton.style.display = "none";
+            typedDisplay.style.display = "none";
+            verticalDisplay.style.display = "flex";
+            verticalDisplay.innerHTML = "";
+            verticalIndex = 0;
+            verticalType();
+        } else if (currentPhase === 2) {
+            // Fase 2: Iniciar efecto Matrix
+            controlButton.style.display = "none";
+            startMatrixEffect();
+        }
+    });
 
-    // Animación vertical: Escribe cada letra y su significado letra por letra
-    let verticalIndex = 0;
-
+    // Animación vertical: se escribe letra por letra (cada línea contendrá la letra y su significado)
     function verticalType() {
         if (verticalIndex < missionText.length) {
-            // Crear contenedor para la letra y su tooltip
             let div = document.createElement("div");
             div.className = "letter";
 
-            // Crear span para la letra (inicialmente vacío)
+            // Span para la letra
             let letterSpan = document.createElement("span");
             letterSpan.className = "letter-char";
             div.appendChild(letterSpan);
 
-            // Texto completo para la letra
+            // Texto completo (normalmente 1 carácter)
             let fullLetter = missionText[verticalIndex];
 
             // Animar la escritura de la letra
             animateText(letterSpan, fullLetter, 0, function() {
-                // Si hay significado, animarlo
+                // Si hay significado, animarlo también
                 if (letterMeanings[verticalIndex]) {
                     let tooltipSpan = document.createElement("span");
                     tooltipSpan.className = "tooltip";
@@ -150,45 +159,30 @@ document.addEventListener("DOMContentLoaded", function() {
 
             verticalDisplay.appendChild(div);
         } else {
-            // Finalizada la animación vertical, mostramos la instrucción para activar Matrix
-            instruction.style.display = "block";
-            // Para activar Matrix, se usará el toque en pantalla (registrando doble tap)
-            document.addEventListener("click", matrixActivation, false);
+            // Finalizada la animación vertical, actualizamos la fase y mostramos el botón para Matrix
+            currentPhase = 2;
+            controlButton.style.display = "inline-block";
+            controlButton.textContent = "Ejecutar"; // vuelve a decir "Ejecutar"
         }
     }
 
-    // Función para animar la escritura de un texto en un elemento (letra por letra)
+    // Función para animar la escritura letra por letra en un elemento
     function animateText(element, fullText, currentIndex, callback) {
         if (currentIndex < fullText.length) {
             element.textContent += fullText[currentIndex];
-            // Reproduce el sonido de tipeo para cada carácter
+            // Sonido por cada carácter
             typingSound.currentTime = 0;
             typingSound.play();
             setTimeout(function() {
                 animateText(element, fullText, currentIndex + 1, callback);
-            }, 100); // Retardo entre cada carácter (ajústalo si lo deseas)
+            }, 100); // Retardo entre cada carácter (ajústalo según prefieras)
         } else {
             callback();
         }
     }
 
-    // PASO 4: Activar el efecto Matrix con doble toque
-    let lastTap = 0;
-
-    function matrixActivation(e) {
-        let currentTime = new Date().getTime();
-        let tapLength = currentTime - lastTap;
-        if (tapLength < 300 && tapLength > 0) {
-            // Si se detecta doble toque (dos taps en menos de 300 ms), se activa Matrix
-            document.removeEventListener("click", matrixActivation, false);
-            startMatrixEffect();
-        } else {
-            lastTap = currentTime;
-        }
-    }
-
+    // Efecto Matrix: se activa al pulsar el botón en fase 2
     function startMatrixEffect() {
-        // Oculta la interfaz anterior y muestra el canvas con el efecto Matrix
         displayStep.style.display = "none";
         matrixCanvas.style.display = "block";
         matrixCanvas.width = window.innerWidth;
@@ -196,7 +190,7 @@ document.addEventListener("DOMContentLoaded", function() {
         matrixRain(matrixCanvas);
     }
 
-    // Efecto Matrix usando canvas
+    // Efecto "Matrix Rain" en canvas
     function matrixRain(canvas) {
         let ctx = canvas.getContext("2d");
         let width = canvas.width;
@@ -204,8 +198,7 @@ document.addEventListener("DOMContentLoaded", function() {
         let fontSize = 16;
         let columns = Math.floor(width / fontSize);
         let drops = new Array(columns).fill(0);
-        let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%";
-        characters = characters.split("");
+        let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%".split("");
 
         function draw() {
             ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
