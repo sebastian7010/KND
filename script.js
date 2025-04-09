@@ -19,49 +19,24 @@ document.addEventListener("DOMContentLoaded", function() {
     const controlButton = document.getElementById("controlButton");
     const matrixCanvas = document.getElementById("matrixCanvas");
 
-    // Función para reproducir la voz (speech synthesis)
+    // Función para reproducir la voz usando ResponsiveVoice
     function speakText(text) {
-        console.log("speakText called with text:", text);
-        if ('speechSynthesis' in window) {
-            // Intentar obtener las voces disponibles
-            let voices = speechSynthesis.getVoices();
-            if (!voices || voices.length === 0) {
-                // Si no hay voces, esperar a que se carguen
-                console.log("No voices available, esperando...");
-                window.speechSynthesis.onvoiceschanged = function() {
-                    console.log("onvoiceschanged event fired");
-                    speakText(text);
-                };
-                return;
+        console.log("ResponsiveVoice speakText called with text:", text);
+        // Por ejemplo, se usa "Spanish Female". Ajusta si lo prefieres.
+        responsiveVoice.speak(text, "Spanish Female", {
+            rate: 1,
+            pitch: 1,
+            volume: 1,
+            onstart: function() {
+                console.log("ResponsiveVoice: Speech started");
+            },
+            onend: function() {
+                console.log("ResponsiveVoice: Speech ended");
+            },
+            onerror: function(e) {
+                console.error("ResponsiveVoice error:", e);
             }
-            // Crear el utterance
-            let utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = "es-ES"; // Configura el idioma a español
-            // Buscar una voz que soporte español
-            let spanishVoice = voices.find(v => v.lang.indexOf("es") !== -1);
-            if (spanishVoice) {
-                console.log("Using Spanish voice:", spanishVoice.name);
-                utterance.voice = spanishVoice;
-            } else {
-                console.log("No se encontró voz en español, se usará la voz por defecto.");
-            }
-            // Configurar algunos parámetros opcionales
-            utterance.rate = 1;
-            utterance.pitch = 1;
-            utterance.volume = 1;
-            utterance.onstart = function() {
-                console.log("Speech started for text:", text);
-            };
-            utterance.onend = function() {
-                console.log("Speech ended for text:", text);
-            };
-            utterance.onerror = function(e) {
-                console.error("Speech synthesis error:", e);
-            };
-            speechSynthesis.speak(utterance);
-        } else {
-            console.log("El navegador no soporta Speech Synthesis");
-        }
+        });
     }
 
     // Genera el formulario para ingresar el significado de cada letra
@@ -126,14 +101,16 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // PASO 3 (continuación): Animación vertical: escribe cada letra y su significado con voz
+    // PASO 3 (continuación): Animación vertical.
+    // Ahora, en cada iteración se escribe la letra y su tooltip,
+    // pero la voz solo reproducirá el significado (si se proporciona).
     function verticalType() {
         console.log("verticalType called at index:", verticalIndex);
         if (verticalIndex < missionText.length) {
             let div = document.createElement("div");
             div.className = "letter";
 
-            // Span para la letra
+            // Span para la letra (se muestra, pero no se lee)
             let letterSpan = document.createElement("span");
             letterSpan.className = "letter-char";
             div.appendChild(letterSpan);
@@ -143,8 +120,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             // Anima la escritura de la letra
             animateText(letterSpan, fullLetter, 0, function() {
-                let textToSpeak = fullLetter; // Texto que se leerá en voz
-                // Si existe un significado, se concatena y se anima su despliegue
+                // Solo se leerá el significado, si existe.
                 if (letterMeanings[verticalIndex]) {
                     let tooltipSpan = document.createElement("span");
                     tooltipSpan.className = "tooltip";
@@ -152,15 +128,15 @@ document.addEventListener("DOMContentLoaded", function() {
                     let fullTooltip = " - " + letterMeanings[verticalIndex];
                     console.log("Animating tooltip:", fullTooltip);
                     animateText(tooltipSpan, fullTooltip, 0, function() {
-                        textToSpeak += fullTooltip;
-                        console.log("Calling speakText with combined text:", textToSpeak);
+                        // En lugar de concatenar con la letra, se lee únicamente el significado.
+                        let textToSpeak = letterMeanings[verticalIndex];
+                        console.log("Calling speakText with meaning only:", textToSpeak);
                         speakText(textToSpeak);
                         verticalIndex++;
                         setTimeout(verticalType, 300);
                     });
                 } else {
-                    console.log("Calling speakText with letter only:", textToSpeak);
-                    speakText(textToSpeak);
+                    console.log("No meaning provided for letter", fullLetter, "- not speaking.");
                     verticalIndex++;
                     setTimeout(verticalType, 300);
                 }
@@ -209,6 +185,7 @@ document.addEventListener("DOMContentLoaded", function() {
         let columns = Math.floor(width / fontSize);
         let drops = new Array(columns).fill(0);
         let characters = "m Ipsumは、印刷および植字業界の単なるダミーテキストです。Lorem Ipsumは、1500年代以来、業界の標準的なダミーテキストでした。!@#$%^&*()_+-=[]m Ipsumは、印刷および植字業界の単なるダミーテキストです。Lorem Ipsumは、1500年代以来、業界の標準的なダミーテキストでした。{}|;:',.<>m Ipsumは、印刷および植字業界の単なるダミーテキストです。Lorem Ipsumは、1500年代以来、業界の標準的なダミーテキストでした。/?".split("");
+
 
         function draw() {
             ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
