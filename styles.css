@@ -146,3 +146,68 @@ canvas {
     margin: 10px 0;
     /* Espaciado vertical entre letras */
 }
+
+
+/* Para el contenedor verticalDisplay, que muestre cada letra en columna */
+
+#verticalDisplay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    /* Opcional, si deseas centrar verticalmente en pantalla: */
+    /* justify-content: center;
+       min-height: 100vh; */
+}
+
+
+/* Cada letra (línea) se mostrará centrada */
+
+.letter {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+    margin: 10px 0;
+}
+
+
+/* Posición fija para el botón (si se desea mayor visibilidad en pantalla) */
+
+#controlButton {
+    position: fixed;
+    bottom: 80px;
+    /* Ajusta según necesites */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+
+/* Estilo para la imagen central */
+
+#centerImage {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    /* Inicia pequeña */
+    animation: zoomIn 5s forwards;
+    /* La animación dura 5 segundos (ajusta según lo necesites) */
+    z-index: 100;
+    /* Se asegura que aparezca por encima del canvas */
+    pointer-events: none;
+    /* Si no quieres que interfiera con otros elementos */
+    max-width: 80%;
+    /* Puedes ajustar el tamaño máximo de la imagen */
+}

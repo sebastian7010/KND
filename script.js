@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let missionText = "";
     let letterMeanings = [];
     let typedIndex = 0;
-    let currentPhase = 0; // 0 = antes del efecto, 1 = efecto horizontal terminado, 2 = efecto vertical terminado
+    let currentPhase = 0; // 0: antes del efecto, 1: efecto horizontal terminado, 2: efecto vertical terminado
     let verticalIndex = 0;
     // Archivo de audio para el sonido de tipeo (coloca el archivo "typing.mp3" en la misma carpeta)
     const typingSound = new Audio('typing.mp3');
@@ -19,10 +19,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const controlButton = document.getElementById("controlButton");
     const matrixCanvas = document.getElementById("matrixCanvas");
 
-    // Función para reproducir la voz usando ResponsiveVoice
+    // Función para reproducir texto usando ResponsiveVoice
     function speakText(text) {
         console.log("ResponsiveVoice speakText called with text:", text);
-        // Por ejemplo, se usa "Spanish Female". Ajusta si lo prefieres.
+        // Se usa "Spanish Female", pero puedes cambiarlo según prefieras.
         responsiveVoice.speak(text, "Spanish Female", {
             rate: 1,
             pitch: 1,
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function() {
         startTypedEffect();
     }
 
-    // PASO 3: Efecto horizontal de tipeo (escribe el mensaje en typedDisplay)
+    // PASO 3: Efecto horizontal de tipeo (se muestra el nombre de la misión)
     function startTypedEffect() {
         console.log("startTypedEffect called");
         typedDisplay.textContent = "";
@@ -101,42 +101,40 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // PASO 3 (continuación): Animación vertical.
-    // Ahora, en cada iteración se escribe la letra y su tooltip,
-    // pero la voz solo reproducirá el significado (si se proporciona).
+    /* PASO 3 (continuación): Animación vertical
+       Se muestra cada letra de la misión de forma vertical (una debajo de la otra) 
+       y para cada una se despliega su significado (con efecto typing y sonido).
+       En este paso la voz no leerá nada.
+    */
     function verticalType() {
         console.log("verticalType called at index:", verticalIndex);
         if (verticalIndex < missionText.length) {
             let div = document.createElement("div");
             div.className = "letter";
 
-            // Span para la letra (se muestra, pero no se lee)
+            // Se crea el span que mostrará la letra
             let letterSpan = document.createElement("span");
             letterSpan.className = "letter-char";
             div.appendChild(letterSpan);
 
             let fullLetter = missionText[verticalIndex];
             console.log("Animating letter:", fullLetter);
-
-            // Anima la escritura de la letra
+            // Efecto de typing para la letra
             animateText(letterSpan, fullLetter, 0, function() {
-                // Solo se leerá el significado, si existe.
+                // Una vez mostrada la letra, se añade el significado en forma de tooltip
                 if (letterMeanings[verticalIndex]) {
                     let tooltipSpan = document.createElement("span");
                     tooltipSpan.className = "tooltip";
                     div.appendChild(tooltipSpan);
-                    let fullTooltip = " - " + letterMeanings[verticalIndex];
-                    console.log("Animating tooltip:", fullTooltip);
+                    let fullTooltip = letterMeanings[verticalIndex];
+                    console.log("Animating tooltip (meaning):", fullTooltip);
                     animateText(tooltipSpan, fullTooltip, 0, function() {
-                        // En lugar de concatenar con la letra, se lee únicamente el significado.
-                        let textToSpeak = letterMeanings[verticalIndex];
-                        console.log("Calling speakText with meaning only:", textToSpeak);
-                        speakText(textToSpeak);
+                        // En este paso no se reproduce voz por cada letra
                         verticalIndex++;
                         setTimeout(verticalType, 300);
                     });
                 } else {
-                    console.log("No meaning provided for letter", fullLetter, "- not speaking.");
+                    console.log("No meaning provided for letter", fullLetter, "- skipping voice.");
                     verticalIndex++;
                     setTimeout(verticalType, 300);
                 }
@@ -145,12 +143,13 @@ document.addEventListener("DOMContentLoaded", function() {
         } else {
             console.log("Finished verticalType animation");
             currentPhase = 2;
+            // Se muestra el botón de ejecutar Matrix (se reubica en CSS para mayor visibilidad)
             controlButton.style.display = "inline-block";
             controlButton.textContent = "Ejecutar Matrix";
         }
     }
 
-    // Función auxiliar: anima la escritura de un texto, carácter por carácter, con sonido
+    // Función auxiliar: anima la escritura de un texto, carácter por carácter, con sonido de tipeo
     function animateText(element, fullText, currentIndex, callback) {
         if (currentIndex < fullText.length) {
             element.textContent += fullText[currentIndex];
@@ -166,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // PASO 4: Inicia el efecto Matrix mediante canvas (sin reproducir sonido)
+    // PASO 4: Efecto Matrix mediante canvas (sin sonido)
     function startMatrixEffect() {
         console.log("startMatrixEffect called");
         displayStep.style.display = "none";
@@ -174,9 +173,12 @@ document.addEventListener("DOMContentLoaded", function() {
         matrixCanvas.width = window.innerWidth;
         matrixCanvas.height = window.innerHeight;
         matrixRain(matrixCanvas);
+        // Lanza el efecto de imagen después de 2 segundos (ajusta el tiempo según tu necesidad)
+        setTimeout(startImageEffect, 2000);
     }
 
-    // Efecto Matrix (sin sonido) usando sólo símbolos y texto en verde
+
+    // Efecto Matrix: se muestra el canvas con efecto "Matrix"
     function matrixRain(canvas) {
         let ctx = canvas.getContext("2d");
         let width = canvas.width;
@@ -184,8 +186,7 @@ document.addEventListener("DOMContentLoaded", function() {
         let fontSize = 16;
         let columns = Math.floor(width / fontSize);
         let drops = new Array(columns).fill(0);
-        let characters = "m Ipsumは、印刷および植字業界の単なるダミーテキストです。Lorem Ipsumは、1500年代以来、業界の標準的なダミーテキストでした。!@#$%^&*()_+-=[]m Ipsumは、印刷および植字業界の単なるダミーテキストです。Lorem Ipsumは、1500年代以来、業界の標準的なダミーテキストでした。{}|;:',.<>m Ipsumは、印刷および植字業界の単なるダミーテキストです。Lorem Ipsumは、1500年代以来、業界の標準的なダミーテキストでした。/?".split("");
-
+        let characters = "!@#$%^&*()_+-=[]{}|;:',.<>/?".split("");
 
         function draw() {
             ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
@@ -204,7 +205,9 @@ document.addEventListener("DOMContentLoaded", function() {
         setInterval(draw, 33);
     }
 
-    // Event listener para el botón de Misión
+    /* EVENT LISTENERS */
+
+    // Paso 1: Ingreso de la misión
     document.getElementById("missionButton").addEventListener("click", function() {
         missionText = missionInput.value.trim();
         console.log("Mission text entered:", missionText);
@@ -215,13 +218,13 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Event listener para el botón de Significados
+    // Paso 2: Ingreso de significados
     document.getElementById("letterButton").addEventListener("click", function() {
         console.log("Collecting letter meanings");
         collectLetterMeanings();
     });
 
-    // Botón de control para avanzar en las fases (de horizontal a vertical y luego a Matrix)
+
     controlButton.addEventListener("click", function() {
         console.log("Control button clicked, currentPhase:", currentPhase);
         if (currentPhase === 1) {
@@ -233,7 +236,47 @@ document.addEventListener("DOMContentLoaded", function() {
             verticalType();
         } else if (currentPhase === 2) {
             controlButton.style.display = "none";
-            startMatrixEffect();
+            // Agregamos un retraso de 1 segundo antes de iniciar la lectura y efecto Matrix
+            setTimeout(function() {
+                let fullMissionText = "Misión " + missionText + ". Significados: " + letterMeanings.join(", ");
+                console.log("Reading full mission and meanings:", fullMissionText);
+                responsiveVoice.speak(fullMissionText, "Spanish Female", {
+                    rate: 1,
+                    pitch: 1,
+                    volume: 1,
+                    onstart: function() {
+                        console.log("ResponsiveVoice: Speech started for full mission");
+                    },
+                    onend: function() {
+                        console.log("ResponsiveVoice: Speech ended for full mission, starting Matrix effect");
+                        startMatrixEffect();
+                    },
+                    onerror: function(e) {
+                        console.error("ResponsiveVoice error:", e);
+                        startMatrixEffect();
+                    }
+                });
+            }, 1000);
         }
     });
-});
+
+
+    // Función para iniciar el efecto de imagen en el centro de la Matrix
+    function startImageEffect() {
+        console.log("Starting image effect");
+        // Creamos el elemento imagen
+        let img = document.createElement("img");
+        img.id = "centerImage";
+        // Ajusta esta ruta al nombre y ubicación de tu imagen
+        img.src = "assets/WhatsApp Image 2025-04-09 at 10.29.13 AM.jpeg";
+        // Se establece el alt para accesibilidad
+        img.alt = "Imagen del Final";
+
+        // Se agrega la imagen al body o sobre el canvas
+        document.body.appendChild(img);
+
+        // Opcional: Si deseas que la imagen se retire después de cierto tiempo, podrías
+        // usar un setTimeout para removerla, ej.:
+        // setTimeout(() => { img.remove(); }, 10000);
+    }
+})
