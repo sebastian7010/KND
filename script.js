@@ -186,7 +186,7 @@ document.addEventListener("DOMContentLoaded", function() {
         let fontSize = 16;
         let columns = Math.floor(width / fontSize);
         let drops = new Array(columns).fill(0);
-        let characters = "!@#$%^&*()_+-=[]{}|;:',.<>/?".split("");
+        let characters = "!@#$%^&経済的費用なしで提供されるGoogleのサービスは、単語、フレーズ、およびWebページを100を超える言語に即座に変換します。*()_+-=[]{}|;:',.<>/?".split("");
 
         function draw() {
             ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
